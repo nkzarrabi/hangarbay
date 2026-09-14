@@ -1,0 +1,25 @@
+name: FAA importer package
+on:
+  pull_request:
+    paths: ["packages/hangarbay-faa/**", ".github/workflows/faa-package.yml"]
+  push:
+    branches: [main]
+    paths: ["packages/hangarbay-faa/**", ".github/workflows/faa-package.yml"]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.10", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: pip install ./packages/hangarbay-faa
+      - run: python -m unittest discover -s packages/hangarbay-faa/tests -v
+      - name: Verify installed import outside repository
+        working-directory: /tmp
+        run: python -c "import hangarbay_faa; print(hangarbay_faa.__version__)"
